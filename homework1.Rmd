@@ -1,0 +1,41 @@
+---
+title: "homework1"
+author: "Collin"
+date: "10/7/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+### Q1:
+*There are a number of seismic recordings from earthquakes and from mining explosions in the R package "astsa". All of the data are in the dataframe  "eqexp", but two specific recordings are in  "EQ5" and "EX6", the fifth earthquake and the sixth explosion, respectively. The data represent two phases or arrivals along the surface, denoted by P (t = 1,…, 1024) and S (t = 1025,…, 2048), at a seismic recording station. The recording instruments are in Scandinavia and monitor a Russian nuclear testing site. The general problem of interest is in distinguishing between these waveforms in order to maintain a comprehensive nuclear test ban treaty. 
+To compare the earthquake and explosion signals,*
+
+**(a)** *Plot the two series separately in a multifigure plot with two rows and one column.*
+
+```{r plotdata, echo =FALSE}
+library("aTSA")
+str(astsa::eqexp)
+p_index = 1:1024
+time_series_name = c("EQ5", "EX6")
+time_series_to_be_plotted = astsa::eqexp[p_index, time_series_name] #row vector,column vector
+plot.ts(time_series_to_be_plotted,
+        plot.type = "multiple",
+        nc = 1, #number of columns parameter
+        main = "P waves") #explicit plot.ts call
+
+
+```
+
+
+
+
+
+
+
