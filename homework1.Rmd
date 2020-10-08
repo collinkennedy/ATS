@@ -33,6 +33,22 @@ plot.ts(time_series_to_be_plotted,
 
 ```
 
+**(b)** *Plot the two series on the same graph using different colors or different line types.*
+
+```{r secondplot, echo = FALSE}
+s_index = p_index+1024
+colors_name = c("red", "blue")#red is p waves, blue is s waves (I believe)
+time_series_to_be_plotted = astsa::eqexp[s_index, time_series_name]#time period/index,columns of TS data
+plot.ts(time_series_to_be_plotted,
+        plot.type="single",
+        main="P & S waves",
+        col=colors_name, #associate red with column EQ5, blue with column EX6
+        ylab="somethings")
+legend("bottomleft",
+       time_series_name,
+       col=colors_name,
+       lty=1)
+```
 
 
 
