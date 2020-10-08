@@ -41,7 +41,7 @@ colors_name = c("red", "blue")#red is p waves, blue is s waves (I believe)
 time_series_to_be_plotted = astsa::eqexp[s_index, time_series_name]#time period/index,columns of TS data
 plot.ts(time_series_to_be_plotted,
         plot.type="single",
-        main="P & S waves",
+        main="P & S Waves",
         col=colors_name, #associate red with column EQ5, blue with column EX6
         ylab="somethings")
 legend("bottomleft",
@@ -50,8 +50,14 @@ legend("bottomleft",
        lty=1)
 ```
 
+**(c)** *Would you treat the earthquake and explosion series as stationary or non-stationary? Support your answer.*
+ Let's take a look at the acf:
+
+```{r acf}
+acf(time_series_to_be_plotted)
+
+```
 
 
-
-
-
+(d) Consider the signal plus noise model: ![](https://canvas.ucdavis.edu/equation_images/x_t%253Ds_t%2520%252B%2520%255Comega_t)
+where ![](https://canvas.ucdavis.edu/equation_images/%255Comega_t%255Csim%2520WN(0%252C1))
