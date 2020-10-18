@@ -1,0 +1,177 @@
+---
+title: "homework2"
+author: "Collin"
+date: "10/18/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+
+## Question 1
+- a) *Simulate a series of 𝑛=500 Gaussian white noise observations as in Example 1.7 of textbook and compute the smaple ACF, 𝜌̂(ℎ)to lag 20. Compare the sample ACF you obtained to the actual ACF, 𝜌(ℎ)*
+
+```{r}
+set.seed(530476)
+N = 500
+w = rnorm(N)
+
+plot.ts(w, main = "White Noise Process, n = 500")
+acf(w, lag.max = 20, main = "White Noise Process (sample) ACF, n = 500")
+#x_acf = acf(x, na.action = na.omit)
+```
+actual  acf:
+```{r}
+x = cbind(c(0:20),c(1,rep(0,20)))
+plot(x[,1],x[,2], type = "h", main = "Population ACF ", xlab = "Lag", ylab = "ACF"); abline(h=0)
+
+```
+The sample ACF and Theoretical population ACF are very similar. While with the true ACF there is no autocorrelation beyond the 0th lag (because White Noise process is Independent), in the sample ACF we see there is maybe a little autocorrelation between lags, but it is not statistically significant.
+
+
+- **b)**  *Repeat part (a) using only 𝑛=50 How does changing 𝑛 affect the results?*
+```{r wtf}
+set.seed(530476)
+N = 50
+w = rnorm(N)
+
+plot.ts(w, main = "White Noise Process, n = 50")
+acf(w, lag.max = 20, main = "White Noise Process (sample) ACF, n = 50")
+#x_acf = acf(x, na.action = na.omit)
+```
+
+
+The main difference appears to be that the second time series (with n = 50) is less cluttered. In terms of a difference seen in the sample and actual ACF plots, when n goes from 500 -> 50, the sample autocorrelation in the n = 50 case seems to be (slightly) larger (though still statistically insignificant).
+
+## Question 2
+- **a)** *Simulate a series of 𝑛=500 moving average observations as in Example 1.8 of textbook and compute the Compare the sample ACF you obtained to the actual ACF, 𝜌(ℎ*
+)
+when n = 500
+```{r}
+set.seed(530476)
+N = 500
+w = rnorm(N)
+x = filter(w, filter=rep(1/3,3))
+some_ts = x
+plot(some_ts)
+x_acf = acf(x, na.action = na.omit)
+```
+
+**include an image/sketch of actual ACF**
+![](/Users/collinkennedy/Google Drive/UC Davis/acf.jpg)
+
+when n = 50:
+```{r}
+set.seed(530476)
+N = 50
+w = rnorm(N)
+x = filter(w, filter=rep(1/3,3))
+some_ts = x
+plot(some_ts)
+x_acf = acf(x, na.action = na.omit)
+```
+
+
+## Question 3
+
+
+
+-**a**) 
+```{r}
+JJ <- log10(JohnsonJohnson)
+plot(cbind(x=JohnsonJohnson, logx=JJ),
+     main="Johnson & Johnson Quarterly Earnings")
+fit <- StructTS(JJ, type = "BSM")
+tsdiag(fit)
+sm <- tsSmooth(fit)
+plot(cbind(JJ, sm[, 1], sm[, 3]-0.5), plot.type = "single",
+     col = c("black", "green", "blue"))
+abline(h = -0.5, col = "grey60")
+monthplot(fit)
+
+```
+
+
+
+
+
+
+## Question 4
+-insert scan
+
+
+
+
+## Question 5
+-insert scan
+
+
+
+
+##Question 6
+- **a** *Argue that the glacial varves series, say 𝑋𝑡, exhibits heteroscedasticity by computing the sample variance over the first half and the second half of the data.*
+```{r}
+library(astsa)
+#variance of the first half of the varve (glacier) time series:
+var(varve[1:(length(varve))/2])
+
+
+#variance of the second half
+var(varve[(length(varve)/2):length(varve)])
+
+
+logTransformedYt = log(varve)
+ts = cbind(varve,logTransformedYt)
+plot.ts(ts)
+
+var(logTransformedYt[1:(length(logTransformedYt))/2])
+
+var(logTransformedYt[(length(varve)/2):length(logTransformedYt)])
+
+```
+The glacier time series, Xt, appears to display heteroskedasticity, since the variance is non-constant throughout the entire series (significantly larger in the second half of the series than in the first).
+
+However, upon performing a log-transformation on the time series, the variance appears to stabilize.
+```{r}
+#nontransformded
+hist(varve)
+
+#log transformed
+hist(logTransformedYt)
+
+```
+The transformation does also appear to improve the normality assumption. Whereas the raw time series is heavily right skewed, once it is log transformed it looks much more normal.
+
+
+- **b**  Plot the series 𝑌𝑡 Do any time intervals, of the order 100 years, exist where
+one can observe behavior comparable to that observed in the global temperature
+records in Figure 1.2 (page 3 of the textbook)?
+```{r}
+plot.ts(logTransformedYt)
+
+```
+
+
+- **c)**  *Examine the sample ACF of 𝑌𝑡 and comment.*
+```{r}
+acf(logTransformedYt)
+
+```
+log transformed series (Yt) appears to be highly persistent. There is statistically significant autocorrelation between every observation and its 25+ different lags.
+
+
+- **d** *Compute the difference 𝑈𝑡=𝑌𝑡−𝑌𝑡−1, examine its time plot and sample ACF,
+and argue that differencing the logged varve data produces a reasonably stationary
+series.*
+```{r}
+Ut = logTransformedYt - lag(logTransformedYt,1)
+plot.ts(Ut)
+acf(Ut)
+
+```
+
+

@@ -2,7 +2,9 @@
 title: "homework1"
 author: "Collin"
 date: "10/7/2020"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -22,7 +24,7 @@ To compare the earthquake and explosion signals,*
 ```{r plotdata, echo =FALSE}
 library("aTSA")
 str(astsa::eqexp)
-p_index = 1:1024
+p_index = 1:2048
 time_series_name = c("EQ5", "EX6")
 time_series_to_be_plotted = astsa::eqexp[p_index, time_series_name] #row vector,column vector
 plot.ts(time_series_to_be_plotted,
@@ -36,7 +38,7 @@ plot.ts(time_series_to_be_plotted,
 **(b)** *Plot the two series on the same graph using different colors or different line types.*
 
 ```{r secondplot, echo = FALSE}
-s_index = p_index+1024
+s_index = 1:2048
 colors_name = c("red", "blue")#red is p waves, blue is s waves (I believe)
 time_series_to_be_plotted = astsa::eqexp[s_index, time_series_name]#time period/index,columns of TS data
 plot.ts(time_series_to_be_plotted,
@@ -54,10 +56,81 @@ legend("bottomleft",
  Let's take a look at the acf:
 
 ```{r acf}
-acf(time_series_to_be_plotted)
+acf(time_series_to_be_plotted) #Which do of these graphs do I analyze?
 
 ```
 
 
-(d) Consider the signal plus noise model: ![](https://canvas.ucdavis.edu/equation_images/x_t%253Ds_t%2520%252B%2520%255Comega_t)
-where ![](https://canvas.ucdavis.edu/equation_images/%255Comega_t%255Csim%2520WN(0%252C1))
+Given the noticeable seasonality in the (individual) ACF plots of the two time series, I believe the two time series are both *not* stationary
+
+**(d)** *Consider the signal plus noise model: ![](https://canvas.ucdavis.edu/equation_images/x_t%253Ds_t%2520%252B%2520%255Comega_t)
+where ![](https://canvas.ucdavis.edu/equation_images/%255Comega_t%255Csim%2520WN(0%252C1)).* 
+
+*Simulate and plot the following two models.*
+Model (i): 
+
+![](https://canvas.ucdavis.edu/equation_images/x_t%253Ds_t%2520%252B%2520%255Comega_t) where ![](https://canvas.ucdavis.edu/equation_images/%255Comega_t%2520%255Csim%2520WN(0%252C1))
+![](https://canvas.ucdavis.edu/equation_images/%2520%2520%2520%2520s_t%2520%253D%2520%250A%2520%2520%2520%2520%2520%2520%255Cbegin%257Bcases%257D%250A%2520%2520%2520%2520%2520%25200%252C%2520%2526%2520t%253D1%252C%255Cdots%252C125%2520%255C%255C%250A%2520%2520%2520%2520%2520%252010%255C%253Be%255E%257B-%255Cfrac%257Bt-125%257D%257B25%257D%257D%255Ccos(2%255Cpi%2520t%252F4)%2520%252C%2526%2520t%253D126%252C%255Cdots%252C250%250A%2520%2520%2520%2520%2520%2520%255Cend%257Bcases%257D)
+
+Model (ii):
+![](https://canvas.ucdavis.edu/equation_images/x_t%253Ds_t%2520%252B%2520%255Comega_t) where ![](https://canvas.ucdavis.edu/equation_images/%255Comega_t%2520%255Csim%2520WN(0%252C1))
+![](https://pi998nv7pc.execute-api.us-east-1.amazonaws.com/production/svg?tex=s_t%20%3D%20%0A%5Cbegin%7Bcases%7D%0A%20%200%2C%26%20t%3D1%2C%5Cdots%2C125%20%5C%5C%0A%20%2010%5C%3Be%5E%7B-%5Cfrac%7Bt-125%7D%7B250%7D%7D%5Ccos(2%5Cpi%20t%2F4)%20%2C%26%20t%3D126%2C%5Cdots%2C250.%0A%5Cend%7Bcases%7D)
+
+*Compare the general appearance of the series of model (i) and (ii) with the earthquake series and the explosion series.*
+
+model i:
+```{r 1d}
+#model 1
+s_fun1 = function(t) ifelse(t<=125, 0, 10*exp(-(t-125)/25)*cos(2*pi*t/4))
+omega_fun1 = function(t) rnorm(length(t))
+
+t_index = 1:250
+set.seed(19460614)
+x1 = ts(s_fun1(t_index) + omega_fun1(t_index))
+
+str(x1) #str function tells us the object type of the argument (x)
+
+
+
+
+
+```
+
+model ii:
+```{r 1dcon}
+#model 2
+s_fun2 = function(t) ifelse(t<=125, 0, 10*exp(-(t-125)/250)*cos(2*pi*t/4))
+omega_fun2 = function(t) rnorm(length(t))
+
+t_index = 1:250
+set.seed(19460614)
+x2 = ts(s_fun2(t_index) + omega_fun2(t_index))
+
+str(x2) #str function tells us the object type of the argument (x)
+
+```
+
+Plotting them both:
+```{r plottingmodeliandmodelii}
+plot.ts(x1, main = "model i")
+plot.ts(x2, main = "model ii")
+
+plot.ts(time_series_to_be_plotted,
+        plot.type="single",
+        main="P & S Waves- Earthquake and Explosion Series",
+        col=colors_name, #associate red with column EQ5, blue with column EX6
+        ylab="units")
+legend("bottomleft",
+       time_series_name,
+       col=colors_name,
+       lty=1)
+
+
+```
+
+
+Notice that in the case of model i and model ii, the spike in signal occurs later in the time series (about halfway along the time series). This is contrasted against the spike seen in the Explosion Series, where a spike occurs near the beginning, and then again later, also about halfway through the series.
+
+all the of the time series (model 1, model 2, Earthquake & Explosion) are centered about 0.
+
+Also, the Earthquake series experiences a spike in () level, and it stays at that higher level for the remainder of the time series, similarly to the pattern seen in model 2.
