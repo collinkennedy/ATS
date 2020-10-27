@@ -82,37 +82,57 @@ x_acf = acf(x, na.action = na.omit)
 
 -**a**) 
 ```{r}
-JJ <- log10(JohnsonJohnson)
-plot(cbind(x=JohnsonJohnson, logx=JJ),
-     main="Johnson & Johnson Quarterly Earnings")
-fit <- StructTS(JJ, type = "BSM")
-tsdiag(fit)
-sm <- tsSmooth(fit)
-plot(cbind(JJ, sm[, 1], sm[, 3]-0.5), plot.type = "single",
-     col = c("black", "green", "blue"))
-abline(h = -0.5, col = "grey60")
-monthplot(fit)
+jj = JohnsonJohnson
+t = time(jj)-1970 #center it
+jjReg = lm(log(JohnsonJohnson) ~ 0 + t + as.factor(cycle(JohnsonJohnson)))
+summary(jjReg)
 
 ```
 
+- **b)** *If the model is correct, what is the estimated average annual increase in the logged earnings per share?*
+```{r}
+sum(jjReg$coefficients)
+
+```
+The estimated average annual increase in logged earnings per share of Johnson & Johnson stock is approximately 4.33
 
 
+- **c)** *If the model is correct, does the average logged earnings rate increase or decrease from the third quarter to the fourth quarter?*
+```{r}
+jjReg$coefficients[4]-jjReg$coefficients[5]
 
+
+```
+Assuming the model is correct, averaged logged earnings would decrease by .26875. This is a percentage decrease of about 23.3%.
+
+- **d)** *What happens if you include an intercept term in the model in (a)? Explain why there was a problem.*
+
+If you include an intercept in the model, it includes the effect of Quarter 1 earnings in each of the succeeding quarters (think of it as the baseline that following quarters are compared to). We don't want this because we want to be able to easily isolate the unique effect of each quarter on (logged) earnings per share. Including an intercept in the model also leads to the issue of perfect multicollinearity (otherwise known as dummy variable trap).
+
+- **e** *Graph the data, 𝑋𝑡 and superimpose the fitted values, say 𝑋̂𝑡 on the graph. Examine the residuals, 𝑋𝑡−𝑋̂𝑡 and state your conclusions, Does it appear that the model fits the data well (do the residuals look white)?*
+```{r}
+library(aTSA)
+Qtr = factor(cycle(jj))
+trend = time(jj) -1970
+reg = lm(log(jj) ~ 0 + trend + Qtr,na.action = NULL)
+plot.ts(log(jj))
+lines(fitted(reg),col = 3)
+
+```
+The model appears to fit the data well (maybe almost too well? perhaps some overfitting). The residuals appear to be pretty small since the model is so closely fit to the data.
 
 
 ## Question 4
--insert scan
-
-
+![](/Users/collinkennedy/Google Drive/UC Davis/UC Davis/fall_quarter_2020/STA137-Time_Series/IMG_5351.jpg)
 
 
 ## Question 5
--insert scan
+![](/Users/collinkennedy/Google Drive/UC Davis/UC Davis/fall_quarter_2020/STA137-Time_Series/IMG_5352.jpg)
 
 
 
 
-##Question 6
+## Question 6
 - **a** *Argue that the glacial varves series, say 𝑋𝑡, exhibits heteroscedasticity by computing the sample variance over the first half and the second half of the data.*
 ```{r}
 library(astsa)
@@ -147,14 +167,13 @@ hist(logTransformedYt)
 The transformation does also appear to improve the normality assumption. Whereas the raw time series is heavily right skewed, once it is log transformed it looks much more normal.
 
 
-- **b**  Plot the series 𝑌𝑡 Do any time intervals, of the order 100 years, exist where
-one can observe behavior comparable to that observed in the global temperature
-records in Figure 1.2 (page 3 of the textbook)?
+- **b**  *Plot the series 𝑌𝑡 Do any time intervals, of the order 100 years, exist where one can observe behavior comparable to that observed in the global temperature
+records in Figure 1.2 (page 3 of the textbook)?*
 ```{r}
 plot.ts(logTransformedYt)
 
 ```
-
+There does not appear to be any comparable behavior over the given time intervals between the two time series.
 
 - **c)**  *Examine the sample ACF of 𝑌𝑡 and comment.*
 ```{r}
@@ -173,5 +192,7 @@ plot.ts(Ut)
 acf(Ut)
 
 ```
+Both the time series plot and the ACF plot appear to support that notion that the times series is stationary. The time series does not appear to have any sort of time trend, as it is centered around 0 and stays that way for the duration of the series. Its variance also doesn't appear to depend on time, as it also appears to be constant. 
 
+The ACF plot supports this. Aside from a autocorrelation at lag 1, the autocorrelations are practically 0 for the remainder of the series, which means the series' ac(v)f is not dependent on time, another indicator that this time series is indeed stationary.
 

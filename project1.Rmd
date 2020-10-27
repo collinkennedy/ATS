@@ -1,0 +1,138 @@
+---
+title: "project1-temperature"
+author: "Collin"
+date: "10/26/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+### **Project 1**
+
+File "temperature.csv" contains average monthly temperature, say xt, of a region with humid continental climate from January 1964 until December 1975. In this problem, we are going to fit a special type of structural model,
+
+**a)** *(a) plot the data and elaborate on the general pattern of the data.*
+```{r}
+temperature <- read.csv("~/Google Drive/UC Davis/UC Davis/fall_quarter_2020/STA137-Time_Series/temperature.csv", sep="")
+month = factor(cycle(temperature$temperature),12) #create the seasonal component
+
+
+myts <- ts(temperature, start=c(1964, 1), end=c(1975, 12), frequency=12) 
+
+
+#a
+plot(myts)
+
+```
+The main thing worth mentioning is that there is clearly a seasonal component to this 
+temperature time series!
+
+**b** *Fit the regression model:*
+```{r}
+fit = lm(temperature ~ 0 + factor(cycle(myts)),data = myts,na.action = NULL) #no intercept by including 0
+summary(fit)
+
+
+#i
+janToFeb = 20.650-16.608
+febToMar = 32.475-20.650
+marToApr = 46.525-32.475
+aprToMay = 58.092 - 46.525
+mayToJun = 67.500 - 58.092
+juntoJuly = 71.717-67.500
+julyToAug = 69.333 - 71.717
+augToSep = 61.025-69.333
+sepToOct = 50.975 - 61.025
+octToNov = 36.650 -50.975
+novToDec = 23.642-36.650
+
+vecOfTempChanges = c(janToFeb,febToMar,marToApr,aprToMay,mayToJun,juntoJuly,julyToAug,augToSep,sepToOct,octToNov,
+  novToDec)
+
+
+tempChange = matrix(vecOfTempChanges,nrow = 1,ncol=11,byrow = TRUE)
+colnames(tempChange)= c('janToFeb','febToMar','marToApr','aprToMay','mayToJun','juntoJuly','julyToAug','augToSep','sepToOct','octToNov',
+                        'novToDec')
+tempChange
+
+#ii
+fit = lm(temperature ~ 0 + factor(cycle(myts,12)),data = myts,na.action = NULL)
+fittedTS = ts(fit$fitted.values,start=c(1964, 1), end=c(1975, 12), frequency=12) 
+
+plot.ts(myts, xlab = "Time",main = "Observed (black) vs. Fitted Temp:1964-1975")
+par(new=TRUE)
+lines(fittedTS,col=3)
+
+```
+The fitted values appear to fit the time series exceptionally well.There is
+significant overlap between the fitted and observed temperature values over the 
+time series, and the residuals appear to be miniscule.
+
+
+
+**c** *In this part we try to find dominant periodic components in the data. Fit the regression model*
+```{r}
+#fit the model
+tIndex = 1:144
+someFunction = function(t){
+  cos((2*pi*1*t/12)) + sin((2*pi*1*t/12)) + cos((2*pi*2*t/12)) + sin((2*pi*2*t/12)) +
+    cos((2*pi*3*t/12)) + sin((2*pi*3*t/12)) + cos((2*pi*4*t/12)) + sin((2*pi*4*t/12)) +
+    cos((2*pi*5*t/12)) + sin((2*pi*5*t/12)) + cos((2*pi*6*t/12)) + sin((2*pi*6*t/12))
+}
+
+reg = lm(temperature$temperature ~ cos((2*pi*1*tIndex/12)) + sin((2*pi*1*tIndex/12)) + cos((2*pi*2*tIndex/12)) + sin((2*pi*2*tIndex/12)) +
+           cos((2*pi*3*tIndex/12)) + sin((2*pi*3*tIndex/12)) + cos((2*pi*4*tIndex/12)) + sin((2*pi*4*tIndex/12)) +
+           cos((2*pi*5*tIndex/12)) + sin((2*pi*5*tIndex/12)) + cos((2*pi*6*tIndex/12)) + sin((2*pi*6*tIndex/12)))
+
+
+#plotting this function over 1-144 looks like this
+Xt = ts(someFunction(tIndex),start=c(1964, 1), end=c(1975, 12), frequency=12) 
+plot(Xt)
+
+
+#(i) If the model is correct, determine the significant frequencies in the time series. Based on your analysis, how many months it takes for the time series to repeat itself.
+
+#regressing temperature on this function yields:
+summary(reg)
+```
+
+if this model is correct, there appear to be 5 statistically significant terms at the
+5% significance level: the intercept, and the 1st, 2nd, 4th, and 6th periodic components.
+It also appears to take about 12 months for the series to repeat itself. (This is
+consistent with the earlier model we used.)
+
+
+
+```{r}
+#(ii)Graph the data, xt, and superimpose the fitted values, say x^t, on the graph.
+
+fittedTS2 = ts(reg$fitted.values,start=c(1964, 1), end=c(1975, 12), frequency=12)
+plot.ts(myts, xlab = "Time",main = "Observed (black) vs. Fitted:1964-1975")
+par(new=TRUE)
+lines(fittedTS2,col=2)
+
+```
+
+
+```{r}
+#(iii) Examine the residuals, 𝑥𝑡−𝑥̂𝑡, and state your conclusions, Does it appear that the model fits the data well (do the residuals look white)? Does it appear that the residuals are a sample from a Normal distribution? Justify your answer.
+
+
+hist(reg$residuals)
+
+
+
+
+```
+
+based on the overlaying of the fitted values onto the actual time series, the residuals
+appear small, signifying that these periodic components explain much of the variation
+in the model of temperature.
+
+the residuals do in fact appear to be (approximately) normally distributed. While
+not perfectly normal, a large proportion of the errors are centered around 0, and they
+disperse to the left and right in a bell shape.
