@@ -124,6 +124,8 @@ lines(fittedTS2,col=2)
 
 hist(reg$residuals)
 
+qqnorm(reg$residuals)
+qqline(reg$residuals)
 
 
 

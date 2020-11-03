@@ -1,0 +1,320 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={homework1},
+            pdfauthor={Collin},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\providecommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{homework1}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{Collin}
+    \preauthor{\centering\large\emph}
+  \postauthor{\par}
+      \predate{\centering\large\emph}
+  \postdate{\par}
+    \date{10/7/2020}
+
+
+\begin{document}
+\maketitle
+
+\hypertarget{r-markdown}{%
+\subsection{R Markdown}\label{r-markdown}}
+
+This is an R Markdown document. Markdown is a simple formatting syntax
+for authoring HTML, PDF, and MS Word documents. For more details on
+using R Markdown see \url{http://rmarkdown.rstudio.com}.
+
+\hypertarget{q1}{%
+\subsubsection{Q1:}\label{q1}}
+
+\emph{There are a number of seismic recordings from earthquakes and from
+mining explosions in the R package ``astsa''. All of the data are in the
+dataframe ``eqexp'', but two specific recordings are in ``EQ5'' and
+``EX6'', the fifth earthquake and the sixth explosion, respectively. The
+data represent two phases or arrivals along the surface, denoted by P (t
+= 1,\ldots{}, 1024) and S (t = 1025,\ldots{}, 2048), at a seismic
+recording station. The recording instruments are in Scandinavia and
+monitor a Russian nuclear testing site. The general problem of interest
+is in distinguishing between these waveforms in order to maintain a
+comprehensive nuclear test ban treaty. To compare the earthquake and
+explosion signals,}
+
+\textbf{(a)} \emph{Plot the two series separately in a multifigure plot
+with two rows and one column.}
+
+\begin{verbatim}
+## 
+## Attaching package: 'aTSA'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:graphics':
+## 
+##     identify
+\end{verbatim}
+
+\begin{verbatim}
+## 'data.frame':    2048 obs. of  17 variables:
+##  $ EQ1: num  0.000818 0.033801 0.016628 0.004634 -0.036527 ...
+##  $ EQ2: num  -0.208 0.0303 0.099 0.2034 0.5408 ...
+##  $ EQ3: num  -0.021 -0.042 -0.0682 -0.0679 -0.0345 ...
+##  $ EQ4: num  -0.0643 -0.0162 -0.0859 -0.0988 -0.0406 ...
+##  $ EQ5: num  0.1347 0.087 0.1162 0.1134 0.0488 ...
+##  $ EQ6: num  0.0509 0.077 0.0822 0.0588 0.0137 ...
+##  $ EQ7: num  -0.0193 -0.02 -0.0115 -0.0259 -0.0261 ...
+##  $ EQ8: num  -0.0219 -0.2527 -0.1716 -0.144 -0.3197 ...
+##  $ EX1: num  0.04102 0.03004 0.02373 0.0129 0.00261 ...
+##  $ EX2: num  0.0426 0.0264 0.0258 0.0337 0.0149 ...
+##  $ EX3: num  -0.00805 -0.00192 -0.01116 -0.0183 -0.01309 ...
+##  $ EX4: num  -0.073 -0.0947 -0.1144 -0.0908 -0.031 ...
+##  $ EX5: num  -0.1106 -0.0982 -0.0781 -0.0642 -0.0482 ...
+##  $ EX6: num  -0.02724 -0.00959 -0.03337 -0.00614 -0.01189 ...
+##  $ EX7: num  -0.0563 -0.0851 -0.1113 -0.1039 -0.0826 ...
+##  $ EX8: num  0.201 0.242 0.307 0.323 0.209 ...
+##  $ NZ : num  0.3628 0.3382 0.0147 -0.3693 -0.3834 ...
+\end{verbatim}
+
+\includegraphics{homework1_files/figure-latex/plotdata-1.pdf}
+
+\textbf{(b)} \emph{Plot the two series on the same graph using different
+colors or different line types.}
+
+\includegraphics{homework1_files/figure-latex/secondplot-1.pdf}
+
+\textbf{(c)} \emph{Would you treat the earthquake and explosion series
+as stationary or non-stationary? Support your answer.} Let's take a look
+at the acf:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{acf}\NormalTok{(time_series_to_be_plotted) }\CommentTok{#Which do of these graphs do I analyze?}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{homework1_files/figure-latex/acf-1.pdf}
+
+Given the noticeable seasonality in the (individual) ACF plots of the
+two time series, I believe the two time series are both \emph{not}
+stationary
+
+\textbf{(d)} \emph{Consider the signal plus noise model:
+\includegraphics{https://canvas.ucdavis.edu/equation_images/x_t\%253Ds_t\%2520\%252B\%2520\%255Comega_t}
+where
+\includegraphics{https://canvas.ucdavis.edu/equation_images/\%255Comega_t\%255Csim\%2520WN(0\%252C1)}.}
+
+\emph{Simulate and plot the following two models.} Model (i):
+
+\includegraphics{https://canvas.ucdavis.edu/equation_images/x_t\%253Ds_t\%2520\%252B\%2520\%255Comega_t}
+where
+\includegraphics{https://canvas.ucdavis.edu/equation_images/\%255Comega_t\%2520\%255Csim\%2520WN(0\%252C1)}
+\includegraphics{https://canvas.ucdavis.edu/equation_images/\%2520\%2520\%2520\%2520s_t\%2520\%253D\%2520\%250A\%2520\%2520\%2520\%2520\%2520\%2520\%255Cbegin\%257Bcases\%257D\%250A\%2520\%2520\%2520\%2520\%2520\%25200\%252C\%2520\%2526\%2520t\%253D1\%252C\%255Cdots\%252C125\%2520\%255C\%255C\%250A\%2520\%2520\%2520\%2520\%2520\%252010\%255C\%253Be\%255E\%257B-\%255Cfrac\%257Bt-125\%257D\%257B25\%257D\%257D\%255Ccos(2\%255Cpi\%2520t\%252F4)\%2520\%252C\%2526\%2520t\%253D126\%252C\%255Cdots\%252C250\%250A\%2520\%2520\%2520\%2520\%2520\%2520\%255Cend\%257Bcases\%257D}
+
+Model (ii):
+\includegraphics{https://canvas.ucdavis.edu/equation_images/x_t\%253Ds_t\%2520\%252B\%2520\%255Comega_t}
+where
+\includegraphics{https://canvas.ucdavis.edu/equation_images/\%255Comega_t\%2520\%255Csim\%2520WN(0\%252C1)}
+\includegraphics{https://pi998nv7pc.execute-api.us-east-1.amazonaws.com/production/svg?tex=s_t\%20\%3D\%20\%0A\%5Cbegin\%7Bcases\%7D\%0A\%20\%200\%2C\%26\%20t\%3D1\%2C\%5Cdots\%2C125\%20\%5C\%5C\%0A\%20\%2010\%5C\%3Be\%5E\%7B-\%5Cfrac\%7Bt-125\%7D\%7B250\%7D\%7D\%5Ccos(2\%5Cpi\%20t\%2F4)\%20\%2C\%26\%20t\%3D126\%2C\%5Cdots\%2C250.\%0A\%5Cend\%7Bcases\%7D}
+
+\emph{Compare the general appearance of the series of model (i) and (ii)
+with the earthquake series and the explosion series.}
+
+model i:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#model 1}
+\NormalTok{s_fun1 =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(t) }\KeywordTok{ifelse}\NormalTok{(t}\OperatorTok{<=}\DecValTok{125}\NormalTok{, }\DecValTok{0}\NormalTok{, }\DecValTok{10}\OperatorTok{*}\KeywordTok{exp}\NormalTok{(}\OperatorTok{-}\NormalTok{(t}\DecValTok{-125}\NormalTok{)}\OperatorTok{/}\DecValTok{25}\NormalTok{)}\OperatorTok{*}\KeywordTok{cos}\NormalTok{(}\DecValTok{2}\OperatorTok{*}\NormalTok{pi}\OperatorTok{*}\NormalTok{t}\OperatorTok{/}\DecValTok{4}\NormalTok{))}
+\NormalTok{omega_fun1 =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(t) }\KeywordTok{rnorm}\NormalTok{(}\KeywordTok{length}\NormalTok{(t))}
+
+\NormalTok{t_index =}\StringTok{ }\DecValTok{1}\OperatorTok{:}\DecValTok{250}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{19460614}\NormalTok{)}
+\NormalTok{x1 =}\StringTok{ }\KeywordTok{ts}\NormalTok{(}\KeywordTok{s_fun1}\NormalTok{(t_index) }\OperatorTok{+}\StringTok{ }\KeywordTok{omega_fun1}\NormalTok{(t_index))}
+
+\KeywordTok{str}\NormalTok{(x1) }\CommentTok{#str function tells us the object type of the argument (x)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  Time-Series [1:250] from 1 to 250: 0.13 -0.383 -0.192 0.515 0.441 ...
+\end{verbatim}
+
+model ii:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#model 2}
+\NormalTok{s_fun2 =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(t) }\KeywordTok{ifelse}\NormalTok{(t}\OperatorTok{<=}\DecValTok{125}\NormalTok{, }\DecValTok{0}\NormalTok{, }\DecValTok{10}\OperatorTok{*}\KeywordTok{exp}\NormalTok{(}\OperatorTok{-}\NormalTok{(t}\DecValTok{-125}\NormalTok{)}\OperatorTok{/}\DecValTok{250}\NormalTok{)}\OperatorTok{*}\KeywordTok{cos}\NormalTok{(}\DecValTok{2}\OperatorTok{*}\NormalTok{pi}\OperatorTok{*}\NormalTok{t}\OperatorTok{/}\DecValTok{4}\NormalTok{))}
+\NormalTok{omega_fun2 =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(t) }\KeywordTok{rnorm}\NormalTok{(}\KeywordTok{length}\NormalTok{(t))}
+
+\NormalTok{t_index =}\StringTok{ }\DecValTok{1}\OperatorTok{:}\DecValTok{250}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{19460614}\NormalTok{)}
+\NormalTok{x2 =}\StringTok{ }\KeywordTok{ts}\NormalTok{(}\KeywordTok{s_fun2}\NormalTok{(t_index) }\OperatorTok{+}\StringTok{ }\KeywordTok{omega_fun2}\NormalTok{(t_index))}
+
+\KeywordTok{str}\NormalTok{(x2) }\CommentTok{#str function tells us the object type of the argument (x)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  Time-Series [1:250] from 1 to 250: 0.13 -0.383 -0.192 0.515 0.441 ...
+\end{verbatim}
+
+Plotting them both:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot.ts}\NormalTok{(x1, }\DataTypeTok{main =} \StringTok{"model i"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{homework1_files/figure-latex/plottingmodeliandmodelii-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot.ts}\NormalTok{(x2, }\DataTypeTok{main =} \StringTok{"model ii"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{homework1_files/figure-latex/plottingmodeliandmodelii-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot.ts}\NormalTok{(time_series_to_be_plotted,}
+        \DataTypeTok{plot.type=}\StringTok{"single"}\NormalTok{,}
+        \DataTypeTok{main=}\StringTok{"P & S Waves- Earthquake and Explosion Series"}\NormalTok{,}
+        \DataTypeTok{col=}\NormalTok{colors_name, }\CommentTok{#associate red with column EQ5, blue with column EX6}
+        \DataTypeTok{ylab=}\StringTok{"units"}\NormalTok{)}
+\KeywordTok{legend}\NormalTok{(}\StringTok{"bottomleft"}\NormalTok{,}
+\NormalTok{       time_series_name,}
+       \DataTypeTok{col=}\NormalTok{colors_name,}
+       \DataTypeTok{lty=}\DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{homework1_files/figure-latex/plottingmodeliandmodelii-3.pdf}
+
+Notice that in the case of model i and model ii, the spike in signal
+occurs later in the time series (about halfway along the time series).
+This is contrasted against the spike seen in the Explosion Series, where
+a spike occurs near the beginning, and then again later, also about
+halfway through the series.
+
+all the of the time series (model 1, model 2, Earthquake \& Explosion)
+are centered about 0.
+
+Also, the Earthquake series experiences a spike in () level, and it
+stays at that higher level for the remainder of the time series,
+similarly to the pattern seen in model 2.
+
+
+\end{document}

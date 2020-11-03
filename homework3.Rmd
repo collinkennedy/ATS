@@ -1,0 +1,39 @@
+---
+title: "ARMA"
+author: "Collin"
+date: "11/2/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## **Homework 3**
+
+**1)** 
+![](/Users/collinkennedy/Google Drive/UC Davis/UC Davis/fall_quarter_2020/STA137-Time_Series/hw3img1.jpg)
+
+
+**2)**
+```{r}
+set.seed(2)
+coeff = c(-1.6,-.64)
+returnedCoeff = ARMAtoMA(ar=coeff,lag.max = 20)
+returnedCoeff
+
+
+set.seed(2)
+ARMAacf(ma=(returnedCoeff),lag.max = 3)[1:4]
+
+
+
+
+
+```
+
+
+**3)**
+![](/Users/collinkennedy/Google Drive/UC Davis/UC Davis/fall_quarter_2020/STA137-Time_Series/image2.jpg)
+
+

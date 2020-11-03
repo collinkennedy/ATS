@@ -35,7 +35,7 @@ View(as.factor(time(jj)))
 
 
 
-Qtr = factor(cycle(jj))
+Qtr = factor(cycle(jj,4))
 trend = time(jj) -1970
 reg = lm(log(jj) ~ 0 + trend + Qtr,na.action = NULL)
 plot.ts(log(jj))
