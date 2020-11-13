@@ -1,0 +1,153 @@
+---
+title: "ACFandPACF"
+author: "Collin"
+date: "11/5/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## **Homework 4**
+**1**
+![](/Users/collinkennedy/Google Drive/UC Davis/UC Davis/fall_quarter_2020/STA137-Time_Series/hw4q1.jpg)
+![](/Users/collinkennedy/Google Drive/UC Davis/UC Davis/fall_quarter_2020/STA137-Time_Series/work.jpg)
+
+**2**
+**a)**  *Compare the theoretical ACF and PACF of an ARMA(1, 1), an ARMA(1,0), and an ARMA(0,1) series by plotting the ACFs and PACFs of the three series for 𝜙=.6 𝜃=.9
+Comment on the capability of the ACF and PACF to determine the order of the models.*
+
+```{r}
+par(mfrow = c(2,1))
+#ACF and PACF of ARMA(1,1)
+
+armaOneOne = ARMAacf(ar = .6,ma=.9,lag.max=10) #theoretical acf
+plot(armaOneOne,
+type = "h",
+xlab = "lag",
+ylab = "Theoretical ACF",
+main = "Theoretical ACF of ARMA(1,1)"
+)
+abline(h = 0)
+#acf(x1, lag.max = 10)
+
+plot(ARMAacf(ar = .6,ma=.9,lag.max=10,pacf = TRUE),
+             type = "h",
+             xlab = "lag",
+             ylab = "Theoretical PACF",
+             main = "Theoretical PACF of ARMA(1,1)")
+
+abline(h = 0)
+
+
+
+
+#ACF and PACF of ARMA(1,0)
+armaOneZero = ARMAacf(ar = .6,lag.max=10) #theoretical acf
+plot(armaOneZero,
+     type = "h",
+     xlab = "lag",
+     ylab = "Theoretical ACF",
+     main = "Theoretical ACF of ARMA(1,0)"
+)
+abline(h = 0)
+#acf(x1, lag.max = 10)
+
+plot(ARMAacf(ar = .6,lag.max=10,pacf = TRUE), #theoretical PACF
+     type = "h",
+     xlab = "lag",
+     ylab = "Theoretical PACF",
+     main = "Theoretical PACF of ARMA(1,0)")
+
+abline(h = 0)
+
+
+
+
+
+
+
+
+
+#ACF and PACF of ARMA(0,1)
+armaOneZero = ARMAacf(ma = .9,lag.max=10) #theoretical acf
+plot(armaOneZero,
+     type = "h",
+     xlab = "lag",
+     ylab = "Theoretical ACF",
+     main = "Theoretical ACF of ARMA(1,0)"
+)
+abline(h = 0)
+#acf(x1, lag.max = 10)
+
+plot(ARMAacf(ma = .9,lag.max=10,pacf = TRUE), #theoretical PACF
+     type = "h",
+     xlab = "lag",
+     ylab = "Theoretical PACF",
+     main = "Theoretical PACF of ARMA(1,0)")
+
+abline(h = 0)
+```
+
+For AR models, we can use the PACF to help us determine the order of the model.The "True" order of the AR(p) model corresponds to the number of statistically significant lags in the PACF.
+
+For MA models, it is the opposite; we can use the ACF to determine the order of the model.
+The "true" order of the MA model corresponds to the number of statistically significant lags in the ACF.
+
+Neither the ACF or PACF can be used to determine the order of an ARMA model.
+
+
+**b)** *Use arima.sim to generate n = 50 observations from each of the three models discussed in (a). Compute the sample ACFs and PACFs for each model and compare it to the theoretical values. How do the results compare with the general results stated in class?*
+
+```{r}
+arma = arima.sim(list(order = c(1,0,1),ar=.6,ma=.9), n=50)
+
+
+ar = arima.sim(list(order = c(1,0,0),ar=.6), n=50)
+ma = arima.sim(list(order = c(0,0,1),ma=.9), n=50)
+
+par(mfrow = c(2,1))
+acf(arma)
+pacf(arma)
+acf(ar)
+pacf(ar)
+acf(ma)
+pacf(ma)
+
+
+```
+What we see here in the output of the sample ACF and PACF plots is consistent with what we learned in class. For the ARMA(1,1) process, the sample ACF and PACF both tail off; you cannot determine the order of the ARMA(1,1) process by looking at either of the plots. The theoretical and sample plots for both are similar, but the sample plots have a little more volatility at later lags.
+
+For the AR(1) process we see what we would expect to see: the ACF tails off, and the PACF illustrates one significant lag, while the rest are insignificant. For AR processes, the PACF can be used to determine the order of the process.The difference between these sample plots and the theoretical plots above is that there is a little more noise/autocorrelation between lags beyond 1, whereas in the theoretical the lags beyond 1 (in the PACF) are 0.
+
+For the MA(1) process, we again see what is typical: the ACF shows us that the first lag is highly statistically significant, and then the rest are practically 0. The PACF tails off. When it comes to interpreting these plots, the interpretation for the MA compared to the AR is almost the opposite. For the MA process, we can use the ACF plot (as opposed to the PACF in the case of AR models) to determine the order of the process. Since we see one highly statistically significant lag in the ACF plot, 
+
+
+
+**c)** *Repeat part (b) with n=500 samples and compare it with the results you obtained in part (b).*
+
+```{r}
+arma = arima.sim(list(order = c(1,0,1),ar=.6,ma=.9), n=500)
+
+
+ar = arima.sim(list(order = c(1,0,0),ar=.6), n=500)
+ma = arima.sim(list(order = c(0,0,1),ma=.9), n=500)
+
+par(mfrow = c(2,1))
+acf(arma)
+pacf(arma)
+acf(ar)
+pacf(ar)
+acf(ma)
+pacf(ma)
+
+
+```
+
+
+The only thing that I would add is that these plots are just more similar to the theoretical plots in a) than the plots in b) are. 
+
+
+**3**
+![](/Users/collinkennedy/Google Drive/UC Davis/UC Davis/fall_quarter_2020/STA137-Time_Series/q3.jpg)
