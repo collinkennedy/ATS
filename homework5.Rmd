@@ -7,7 +7,164 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(astsa)
 ```
 
 ## 5
 **Question 1**
+
+**a)** *Plot the sample acf and pacf of xt and determine an appropriate ARMA model for the data.*
+```{r}
+acf(cmort)#doesn't look stationary
+pacf(cmort) #potentially an AR(2)
+```
+
+**b)** *Fit the model to the data by using the function "sarima()" in R package "astsa" and then determine the fitted model.*
+```{r}
+model =sarima(cmort,p= 2,d=0,q=0) #how do we know what order model to fit? I based it on pacf
+
+str(model)
+
+model$ttable #what is the xmean output
+model$fit 
+
+```
+
+**c)** *Use the fitted model to find the 1,…,4-step-ahead prediction of the series, i.e. 𝑥𝑛𝑛+𝑘,𝑘=1,2,3,4, and compare your computation with the one obtained by applying the R function "sarima.for()". Please show the details of your computations.*
+```{r}
+sarima(cmort,p= 2,d=0,q=0)
+
+pred = sarima.for(cmort,2,0,0,n.ahead = 4)
+#str(pred) # I get different predicted values when I do the calculation by hand...
+
+#cmort
+
+```
+
+
+**d)** *Compute 𝑃𝑛𝑛+1,𝑃𝑛𝑛+2  and n + 3and compare it with the one produced by  "sarima.for()". Please show the details of you computations.*
+```{r}
+#the prediction error is P (MSEp)
+str(pred) 
+Pn1 = 32.37
+Pn2 = Pn1*(1+(.4301)^2)
+Pn3 = Pn1*(1 + (.4301)^2 + (.4424 + .4301^2)^2 )
+
+#Pn1
+Pn1
+
+#Pn2
+Pn2
+
+#Pn3
+Pn3
+
+#Here is the prediction error produced by R:
+predError = c(32.37,38.31,51.12)
+predError
+
+
+
+```
+
+**e)** *(e) Fit an appropriate AR model to 𝑥𝑡using linear regression.*
+```{r}
+regAR = ar.ols(cmort)
+summary(regAR)
+regAR
+
+
+```
+
+**f)** *(f) Find the forecasts over a four week horizon, i.e. 𝑥𝑛𝑛+𝑘,𝑘=1,2,3,4. Compare your results with those obtained in part (c).*
+```{r}
+#sarima.for(regAR)
+
+predictions = predict(regAR,n.ahead = 4)
+predictions
+
+
+#by hand (so to speak)
+phi1 = .4286
+phi2 = .4418
+intercept = -.04672
+oneStep = intercept + phi1*cmort[length(cmort)] +phi2*cmort[length(cmort)-1]
+twoStep = intercept + phi1*oneStep + phi2*cmort[length(cmort)]
+threeStep = intercept + phi1*twoStep + phi2*oneStep
+fourStep = intercept + phi1*threeStep + phi2*twoStep
+predictionVec = c(oneStep,twoStep,threeStep,fourStep)
+predictionVec #vector of k 1...4 predictions
+
+```
+
+
+**Question 2**
+```{r}
+#rm(list = ls())
+#load data
+df = read.csv("/Users/collinkennedy/Google Drive/Programming Folder (4Transfer to Collin's Files V2)/R/ATS/HW5_Q2_data.csv")
+
+timeSeries = ts(df)
+plot.ts(timeSeries)
+
+acf(timeSeries) #looks to be stationary, though there is a hint of seasonality
+armaOneOneFit = arima(timeSeries, order = c(1,0,1)) #should i be fitting a model with arima()
+
+#or specifying the parameters by using arima.sim()
+armaOneOneSpecified = arima(timeSeries, order = c(1, 0, 1), fixed = c(0.7, 0.4, 0.0))
+length(timeSeries)
+
+sarima.for(timeSeries, n.ahead=4, p=1, d=0, q=1, fixed = c(0.7,.4,0))#how do i order the parameters in the fixed argument
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+**Question 3**
+```{r}
+df2 = read.csv("/Users/collinkennedy/Google Drive/Programming Folder (4Transfer to Collin's Files V2)/R/ATS/HW5_Q3_data.csv")
+
+ts2 = ts(df2)
+```
+
+**a)** *plot the time series. Is there an apparent departure from stationarity?*
+```{r}
+plot.ts(ts2)
+pacf(ts2)
+model2 = arima(ts2, order = c(2,0,0))
+model2
+
+```
+
+
+**b)** *Determine an appropriate ARMA model for the data. Explain how you determined the order of the model.*
+```{r}
+#pacf(ts2)
+
+```
+I looked at the pacf and saw that it cut off at 2 lags. This indicated it to me that it should be an AR(2) model.
+
+
+**c)** *Based on your answer in part (b), estimate the parameters of the ARMA model and construct a 95% confidence interval for the estimated coefficients.*
+```{r}
+confint(model2, level = 0.95)
+
+
+
+```
+
+
+
+
+
+
