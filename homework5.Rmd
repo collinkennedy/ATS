@@ -32,20 +32,37 @@ model$fit
 
 **c)** *Use the fitted model to find the 1,…,4-step-ahead prediction of the series, i.e. 𝑥𝑛𝑛+𝑘,𝑘=1,2,3,4, and compare your computation with the one obtained by applying the R function "sarima.for()". Please show the details of your computations.*
 ```{r}
-sarima(cmort,p= 2,d=0,q=0)
+sarima(cmort,p= 2,d=0,q=0) #fit an arima(2,0,0) model to the cmort time series data
 
-pred = sarima.for(cmort,2,0,0,n.ahead = 4)
+pred = sarima.for(cmort,2,0,0,n.ahead = 4) #calculate the 4 step ahead predictions
 #str(pred) # I get different predicted values when I do the calculation by hand...
 
-#cmort
+#sarima.for predictions:
+#pred$pred
+
+
+#predictions "by hand"
+phi1 =  0.4301
+phi2 = 0.4424
+mu = 88.8538
+oneStepAhead =  phi1*(85.49-88.8538) + phi2*(89.43-88.8538) + mu #add back xmean
+twoStepAhead = phi1*(oneStepAhead-88.8538) + phi2*(85.49-88.8538)  + mu
+threeStepAhead = phi1*(twoStepAhead-88.8538) + phi2*(oneStepAhead-88.8538) + mu
+fourStepAhead = phi1*(threeStepAhead-88.8538) + phi2*(twoStepAhead-88.8538) + mu
+byHandPred = c(oneStepAhead,twoStepAhead,threeStepAhead,fourStepAhead)
+
+predDF = data.frame(sarima.for_predictions = pred$pred, by_hand_predictions = byHandPred)
+rownames(predDF) = c("1 step ahead", "2 step ahead", "3 step ahead", "4 step ahead")
+predDF
 
 ```
+
 
 
 **d)** *Compute 𝑃𝑛𝑛+1,𝑃𝑛𝑛+2  and n + 3and compare it with the one produced by  "sarima.for()". Please show the details of you computations.*
 ```{r}
 #the prediction error is P (MSEp)
-str(pred) 
+str(pred)
 Pn1 = 32.37
 Pn2 = Pn1*(1+(.4301)^2)
 Pn3 = Pn1*(1 + (.4301)^2 + (.4424 + .4301^2)^2 )
@@ -60,16 +77,18 @@ Pn2
 Pn3
 
 #Here is the prediction error produced by R:
-predError = c(32.37,38.31,51.12)
-predError
 
 
-
+predErrorDF = data.frame(MSEp_by_hand = c(Pn1,Pn2,Pn3), se_squared = c(5.69^2,6.19^2,7.15^2))
+rownames(predErrorDF) = c("n+1", "n+2","n+3")
+predErrorDF
 ```
+Comparing the Mean Squared Error of Prediction I calculated by hand with the standard error (squared) that is outputted from the str() function call on my model, they look about the same.
 
-**e)** *(e) Fit an appropriate AR model to 𝑥𝑡using linear regression.*
+
+**e)** *Fit an appropriate AR model to 𝑥𝑡using linear regression.*
 ```{r}
-regAR = ar.ols(cmort)
+regAR = ar.ols(cmort,intercept = TRUE, order.max = 2, demean = FALSE)
 summary(regAR)
 regAR
 
@@ -87,7 +106,7 @@ predictions
 #by hand (so to speak)
 phi1 = .4286
 phi2 = .4418
-intercept = -.04672
+intercept = 11.45
 oneStep = intercept + phi1*cmort[length(cmort)] +phi2*cmort[length(cmort)-1]
 twoStep = intercept + phi1*oneStep + phi2*cmort[length(cmort)]
 threeStep = intercept + phi1*twoStep + phi2*oneStep
@@ -104,29 +123,41 @@ predictionVec #vector of k 1...4 predictions
 #load data
 df = read.csv("/Users/collinkennedy/Google Drive/Programming Folder (4Transfer to Collin's Files V2)/R/ATS/HW5_Q2_data.csv")
 
-timeSeries = ts(df)
-plot.ts(timeSeries)
+timeSeries = ts(df) #create a time series object
+plot.ts(timeSeries) #plot it
 
 acf(timeSeries) #looks to be stationary, though there is a hint of seasonality
 armaOneOneFit = arima(timeSeries, order = c(1,0,1)) #should i be fitting a model with arima()
 
 #or specifying the parameters by using arima.sim()
 armaOneOneSpecified = arima(timeSeries, order = c(1, 0, 1), fixed = c(0.7, 0.4, 0.0))
-length(timeSeries)
+
 
 sarima.for(timeSeries, n.ahead=4, p=1, d=0, q=1, fixed = c(0.7,.4,0))#how do i order the parameters in the fixed argument
 
 
+#now calculating the first step ahead prediction "by hand"
+piJ = ARMAtoAR(ar = .7, ma = .4, lag.max = length(timeSeries))
+
+
+vecOfXs = rev(as.vector(timeSeries[1:200]))
+
+
+#1 step ahead prediction right here
+firstStepAhead = sum((-1)*piJ*vecOfXs)
+secondStepAhead = .7*firstStepAhead
+thirdStepAhead = .7*(secondStepAhead)
+fourthStepAhead = .7*(thirdStepAhead)
+truncPred = c(firstStepAhead,secondStepAhead,thirdStepAhead,fourthStepAhead)
+
+
+presentationDF = data.frame(sarima_for_output = c(-3.429269,-2.400488,-1.680342,-1.176239),truncatedPredictionByHand = truncPred )
+presentationDF
+
+
 
 ```
-
-
-
-
-
-
-
-
+The calculations are noticeably very similar.
 
 
 
