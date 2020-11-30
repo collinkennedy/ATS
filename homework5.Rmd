@@ -118,7 +118,7 @@ predictionVec #vector of k 1...4 predictions
 
 
 **Question 2**
-```{r}
+```{r,results="hide",fig.show="hide"}
 #rm(list = ls())
 #load data
 df = read.csv("/Users/collinkennedy/Google Drive/Programming Folder (4Transfer to Collin's Files V2)/R/ATS/HW5_Q2_data.csv")
