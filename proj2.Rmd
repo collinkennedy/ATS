@@ -1,8 +1,10 @@
 ---
-title: "project2"
-author: "Collin"
+title: "STA 137: Project 2"
+author: "Collin Kennedy"
 date: "11/25/2020"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -22,15 +24,21 @@ plot(mortgage_ts)
 ffr_ts = ts(mortgage$ffr, start=c(1971, 4), end=c(2011, 11), frequency=12)
 
 ```
-I am presented with a dataset of the US monthly 30-year conventional mortgage rates, as well as the federal funds rate, dating from April 1971 to November 2011. The dataset was obtained from FRED, the Federal Reserve's economic database. While the Federal Reserve does not explicitly dictate the 30-year mortgage rate (or the fed funds rate for that matter), the Federal Reserve does exercise considerable control over the federal funds rate, which indirectly impacts mortgage rates.
+I am presented with a dataset of the US monthly 30-year conventional mortgage rates, as well as the federal funds rate, dating from April 1971 to November 2011. The dataset was obtained from FRED, the Federal Reserve's economic database. The federal funds rate is the interest rate that the Federal Open Market Committee sets a target for, and is the rate at which banks borrow and lend their excess reserves. This is the "interest rate" that is often the focal point of financial news, and for good reason, as it impacts practically every interest rate in the economy.  While the Federal Reserve does not explicitly dictate the 30-year mortgage rate (or the fed funds rate for that matter), the Federal Reserve does exercise considerable control over the federal funds rate, which indirectly impacts mortgage rates.
 
-My objective is to determine whether or not it is appropriate to model the relationship between mortgage rates, and if so, fit the most suitable model to represent the process. My report therefore consists of the three following sections:
+"Mortgage rates" themselves are the rate of interest charged on a mortgage, a debt instrument often used to finance the purchase of homes. Unsurprisingly, this rate is also incredibly important to the public, as mortgage rates often serve as an indicator to potential home buyers whether or not it's a good time to buy a house. This motivates our interest in being able to predict the 30-year mortgage rate based on the mortgage rate of previous time period(s).
 
-A *Materials and Methods* section to delve into the details and specifics of my model selection, as well as my diagnosis of the statistical relationship between the federal funds rate, mortgage rates, and time.
+More broadly though, my objective is to determine whether or not it is appropriate to model the relationship between mortgage rates, the federal funds rate, and time, and if so, fit the most suitable models to represent the processes. My report therefore consists of the three following sections:
 
-A *Results* section to discuss my results as well as there implications
+A **Materials and Methods** section to delve into the details and specifics of my model selection, as well as my diagnosis of the statistical relationship between the federal funds rate, mortgage rates, and time. I divide this section in to two subsections:
 
-And lastly, an *Appendix* section to provide the reader with the R code I used to conduct my analysis and to compile this report.
+*Model 1: Mortgage Rate*; where I develop an ARIMA model for the 30 year mortgage rates, without taking into consideration the federal funds rate, and
+
+*Model 2: Mortgage Rates and Federal Funds Rate*; where I model (ARIMA) mortgage rates as a function of past observations of the federal funds rate, as well as lags of the mortgage rate itself.
+
+A **Results** section to discuss my results as well as their implications.
+
+And lastly, an **Appendix** section to provide the reader with the R code I used to conduct my analysis and to compile this report.
 
 ## **Materials and Methods**
 This data represents the changes in the 30 year monthly mortgage rate from April 1971
@@ -46,6 +54,7 @@ The dataset consists of 5 variables (columns):
 -*ffr*: federal funds rate\
 
 Because this is time series data, I felt it was necessary to do some preliminary data exploration and visualization to gain a sense of the overall relationship between the federal funds rate and mortgage rates with time, respectively. 
+
 ```{r, echo=FALSE}
 morg_hist = ggplot(mortgage, aes(x = morg)) +
   geom_histogram(binwidth = 0.05, fill = "darkgreen", color = "darkgreen")+
@@ -57,20 +66,23 @@ ffr_hist = ggplot(mortgage, aes(x = ffr)) +
   scale_x_discrete("federal funds rate")+
   ggtitle("Histogram: Federal Funds rate") #fix x axis
 
-library("gridExtra")
-grid.arrange(morg_hist,ffr_hist)
+#library("gridExtra")
+#grid.arrange(morg_hist,ffr_hist)
 
-
+par(mfrow = c(2,1))
+morg_hist
+ffr_hist
 ```
 
 
 This is notably important for time series data because visualization can help one identify violations of important time series assumptions, such as stationarity.
 
 With this in mind, consider the two graphs illustrating the aforementioned relationships:
-```{r methods}
+```{r methods, echo=FALSE}
 par(mfrow= c(2,1)) 
 morgTSPlot = plot.ts(mortgage_ts, main = " US Monthly Mortgage Rate: 1971 -2011",ylab= "Mortgage Rate")
 ffrTSPlot = plot.ts(ffr_ts, ylab = "Federal Funds Rate", main = "Federal Funds Rate: 1971 - 2011")
+
 
 ```
 
@@ -78,35 +90,41 @@ Given that there is a clear downward trend in the mortgage rate, this is a clear
 of the constant mean assumption for stationarity. As such, I felt it was necessary to perform a transformation to ensure the data was stationary.
 
 I considered a handful of transformations, but ultimately felt that a first-order differencing of the time series would take care of the time trend:
-```{r methods2}
+```{r methods2, echo=FALSE}
 transformed_morg_ts = diff(mortgage_ts,1)
 plot(transformed_morg_ts)
 ```
 
 The differencing does appear to take care of the time trend, and the time series now appears to be stationary. There is clearly an outlier around 1980 (the famous Volcker Recession), but it shouldn't be too problematic going forward.
 
-Next, I consider the autocorrelation and partial autocorrelation of the *transformed* series. This will (potentially) allow me to gain a sense of what model(s) are suitable.
+Next, I consider the autocorrelation and partial autocorrelation of the *transformed* mortgage time series. This will (potentially) allow me to gain a sense of what model(s) are suitable.
 ```{r}
 par(mfrow= c(2,1)) 
 acf(transformed_morg_ts)
 pacf(transformed_morg_ts)
-
 ```
 
 Since both the acf has 1 significant lag and the pacf has 2 significant lags, I could see an 
 Ar(2) or an MA(1) model fitting well.
 
+**Model 1: Mortgage Rate**
+
 #e
 In R, I use the sarima() function to construct these two different ARIMA models, and compare them based on the Bayesian Information Criteria. Note that for both models I apply differencing when creating the model, as opposed to differencing the data itself, and then fitting a standard AR(2) or MA(1) to the differenced data. The end result is effectively the same, so it doesn't matter which method I chose. So, I decided to just use  *integrated* ARMA  (ARIMA) models.
 First, I consider the ARIMA(2,1,0):
+
+
+
+
 ```{r, results= "hide"}
 sar1 = sarima(mortgage_ts,p = 2,d = 1, q = 0)
 ```
 ```{r}
 sar1$BIC
+sar1$ttable
 ```
 
-Next the ARIMA(0,1,1)
+Next the *ARIMA(0,1,1)*:
 ```{r, results="hide"}
 sar2 = sarima(mortgage_ts,p=0,d=1,q=1)
 ```
@@ -118,65 +136,113 @@ sar2$BIC
 
 
 
+
+**Model 2: Mortgage Rates and Federal Funds Rate**
+
 Lastly, because Mortgage rates are known to depend on the Federal Funds rate, I felt it was necessary to construct a model that represents this relationship. 
 ```{r}
-
-#In the previous models, based on the Ljung-Box plot, it was evident that there was noticeable autocorrelated errors. I presume this is the result of the error term picking up the effect of the federal funds rate on mortgage rates. As a result, I need to model the residuals themselves:
 
 laggedFFR = stats::lag(mortgage$ffr)           
 morgLM = lm(mortgage$morg ~ lag(mortgage$ffr))
 summary(morgLM)
 resids = resid(morgLM)
 
+```
+
+```{r, echo=FALSE, message=FALSE}
+
 #check the acf of the residuals
 acf2(resid(morgLM),ylim=c(-.6,1),50)
 
 ```
-While the federal funds rate does appear to explain much of the variation in the mortgage rate, it is also evident, based on the ACF plot, that there is significant autocorrelation. I sought to adjust for this serial correlation:
 
-```{r, results="hide"}
-sarima2 = sarima(mortgage_ts, 2, 0, 0,xreg = cbind(laggedFFR)) #check if AR(2) model for errors
-#this isnt fixing the autocorrelated errors
-
-```
-
-```{r}
-sarima2$ttable
-```
+While the federal funds rate does appear to explain much of the variation in the mortgage rate, it is also evident, based on the ACF plot, that there is significant autocorrelation. I sought to adjust for this serial correlation by modelling the error term as several different ARMA processes, and then selecting the best one again based on BIC:
 
 
+Fitting the residuals with an AR(1):
 ```{r, results="hide"}
 sarima1 = sarima(mortgage_ts, 1, 0, 0, xreg = cbind(laggedFFR))
 ```
 
-```{r}
-sarima1$ttable
+
+
+Fitting the residuals with AR(2):
+```{r, results="hide"}
+sarima2 = sarima(mortgage_ts, 2, 0, 0,xreg = cbind(laggedFFR)) 
 ```
 
+
+Fitting the residuals with AR(3): 
+```{r, results = "hide"}
+sarima3 = sarima(mortgage_ts,3,0,0, xreg = cbind(laggedFFR))
+
+```
+
+
+
+
+Comparing the fitted coefficients between the 3 possible models:
+```{r}
+sarima1$ttable
+
+sarima2$ttable
+
+sarima3$ttable
+```
+
+
+
+Now, comparing the Bayesian Information Criteria between the 3 models:
+```{r}
+sarima1$BIC
+
+sarima2$BIC
+
+sarima3$BIC
+
+
+```
+
+
 ## **Results**
-Based on the two ARIMA models I fit for the mortgage data, I selected the ARIMA(2,1,0) model. While the difference is marginal, this ARIMA model *does* have a smaller BIC value compared to its ARIMA(0,1,1) counterpart. From this perspective, I figured it was appropriate to choose the ARIMA(2,1,0). BIC gives greater penalty to larger models, and in this case, the ARIMA(2,1,0) model has a smaller BIC while being a *slightly* more complex model.
+
+**Results: Model 1**
+
+Based on the two ARIMA models I fit for the mortgage data, I selected the ARIMA(2,1,0) model:
+
+\[
+\Delta X_{mortgagerate_t} = 0.5378 \Delta X_{mortgagerate_(t-1)} - \Delta 0.3182X_{mortgagerate_(t-2)} + w_t  
+\]
+
+First, with the ARIMA(2,1,0) model, the iid white noise assumption appears to remain intact, compared to the ARIMA(0,1,1) model, based on their respective Ljung-Box plots in subsection *Model 1: Mortgage Rates*.
+
+While the difference is marginal, this ARIMA model *does* have a smaller BIC value compared to its ARIMA(0,1,1) counterpart. From this perspective, I figured it was appropriate to choose the ARIMA(2,1,0). BIC gives greater penalty to larger models, and in this case, the ARIMA(2,1,0) model has a smaller BIC while being a *slightly* more complex model.
 
 ARIMA(2,1,0) BIC:
-```{r}
+```{r, echo=FALSE}
 sar1$BIC
 ```
 
 ARIMA(0,1,1)  BIC:
-```{r}
+```{r,echo=FALSE}
 sar2$BIC
 ```
 
-In addition to a smaller Bayesian Information Criteria value, AR models are also easier to interpret from a econometric standpoint. In this specific instance, the regression coefficients of the ARIMA(2,1,0) model can be understood as past observations of mortgage rates predicting the current 30-year mortgage rate. This interpretation is more relevant to economists and financiers than say interpreting the coefficients of an MA model(e.g., past error terms/ white noise predicting current mortgage rates).
+
+In addition to a smaller Bayesian Information Criteria value, AR models are also easier to interpret from an econometric standpoint. In this specific instance, the regression coefficients of the ARIMA(2,1,0) model can be understood as past observations of mortgage rates predicting the current 30-year mortgage rate. This interpretation is more relevant to economists and financiers than say interpreting the coefficients of an MA model(e.g., past error terms/ white noise predicting current mortgage rates).
 
 
-When building the linear model where I regressed the  mortgage rate on the first-order lagged federal funds rate, there was considerable serial correlation (autocorrelated errors). This serial correlation is cause for concern, as it harms the estimation of regression coefficients. Consider the slow decaying trend in the plot of the autocorrelated errors, as well as the two significant lags in the plot of the PACF:
-```{r}
+
+**Results: Model 2**
+
+When building the linear model where I regressed the  mortgage rate on the *first-order lagged federal funds rate*, there was considerable serial correlation (autocorrelated errors). This serial correlation is cause for concern, as it harms the estimation of regression coefficients. Consider the slow decaying trend in the plot of the autocorrelated errors, as well as the two significant lags in the plot of the PACF:
+```{r, message=FALSE, results=FALSE}
 acf2(resid(morgLM),ylim=c(-.6,1),50)
 ```
 
-Thankfully, there are methods to account for this serial correlation. The two significant lags indicated to me that an AR(2) process would likely be a suitable model for the serial correlation. Using the sarima() function, I was able to make an adjusted regression, by designating the order of the model for the autocorrelated error, and including my lagged federal funds rate variable as an external regressor:
+Thankfully, there are methods to account for this serial correlation. The two significant lags indicated to me that an AR(3) process would likely be a suitable model for the serial correlation. Using the sarima() function, I was able to make an adjusted regression, by designating the order of the model for the autocorrelated error, and including my lagged federal funds rate variable as an external regressor:
 ```{r}
-sarima2$fit
+sarima3$fit
 
 
 ```
@@ -184,117 +250,29 @@ sarima2$fit
 This final ARIMA model allows us to model the relationship between current 30-year mortgage rates, and past mortgage rates and the federal funds rate. Notice how by adjusting for the serial correlation, the errors no longer appear to be autocorrelated. Consider the "ACF of  Residuals" plot below:
 
 ```{r results = "hide"}
-sarima2 = sarima(mortgage_ts, 2, 0, 0,xreg = cbind(laggedFFR))
+sarima2 = sarima(mortgage_ts, 3, 0, 0,xreg = cbind(laggedFFR))
 
 ```
 
-Notice the slow decay in the ACF of Residuals plot is gone, and that the error at the vast majority of lags are statistically insignificant.
+Notice the slow decay in the ACF of Residuals plot is gone, and that the error at the vast majority of lags are statistically insignificant. This model also had the smallest BIC value compared to the other 2 models I tried in subsection **Model 2: Mortgage Rates and Federal Funds Rate** of my **Materials and Methods Section** (denoted as "AR3_BIC" in the table below):
+```{r,echo=FALSE}
+outputDF = data.frame(AR1_BIC = sarima1$BIC, AR2_BIC = sarima2$BIC, AR3_BIC = sarima3$BIC) 
+row.names(outputDF) = c("BIC")
+outputDF
+                                                                                    
+```
 
+
+Therefore, my final fitted ARIMA model:
+
+\[
+\hat X_{mortgagerate_t} = 6.8517 + 0.2045X_{ffr_,(t-1)} + 1.4468X_{mortgagerate_,(t-1)} - .7117X_{mortgagerate_,(t-2)} + .2585X_{mortgagerate,(t-3)}
+\]
+
+This ARIMA model will allow us to make predictions about the current 30 year mortgage rate based on past (mortgage) rates, as well as the federal funds rate of the previous time period.
 
 
 ## **Appendix**
 ```{r ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
-library(ggplot2)
-library(tidyverse)
-library(astsa)
-mortgage = read.table("/Users/collinkennedy/Downloads/Downloads/mortgage.txt", header = TRUE, sep=" ")
-
-##month = factor(cycle(temperature$temperature),12) #create the seasonal component
-mortgage_ts <- ts(mortgage$morg, start=c(1971, 4), end=c(2011, 11), frequency=12)
-plot(mortgage_ts)
-ffr_ts = ts(mortgage$ffr, start=c(1971, 4), end=c(2011, 11), frequency=12)
-
-
-#(a) Explain the data, why it is a time series data.
-#This data represents the changes in the 30 year monthly mortgage rate from April 1971
-# to November 2011. On a more statistical level, this data is time series data because
-#it is a collection of observations at equally spaced time points.
-
-
-
-#b)Use exploratory analysis to describe the data
-
-
-#include a box plot 
-
-
-#time series plots
-morgTSPlot = plot.ts(mortgage_ts, main = " US Monthly Mortgage Rate: 1971 -2011",ylab= "Mortgage Rate")
-ffrTSPlot = plot.ts(ffr_ts, ylab = "Federal Funds Rate", main = "Federal Funds Rate: 1971 - 2011",
-                    )
-
-
-#histograms of mortgage and federal funds rate
-morg_hist = ggplot(mortgage, aes(x = morg)) +
-  geom_histogram(binwidth = 0.05, fill = "darkgreen", color = "darkgreen")+
-  scale_x_discrete("mortgage")+
-  ggtitle("Histogram: Mortgage Rates") #fix x axis
-
-ffr_hist = ggplot(mortgage, aes(x = ffr)) +
-  geom_histogram(binwidth = 0.05, fill = "darkgreen", color = "darkblue")+
-  scale_x_discrete("federal funds rate")+
-  ggtitle("Histogram: Federal Funds rate") #fix x axis
-
-library("gridExtra")
-grid.arrange(morg_hist,ffr_hist)
-
-
-#c) (c) Determine if the monthly mortgage rate series is stationary. 
-#If the series was not stationary apply appropriate transformation(s) to make the transformed series 
-#stationary.
-
-#Given that there is a clear downward trend in the mortgage rate, this is a clear violation
-#of the constant mean assumption for stationarity.
-
-#transform the data: applying differencing
-transformed_morg_ts = diff(mortgage_ts,1)
-plot(transformed_morg_ts)
-
-#the trend appears to have been eliminated, and the stationary assumption appears to be met
-
-#d) Compute sample autocorrelation and partial autocorrelation functions for the monthly 
-#mortgage rate and explain their meanings. Is there any model suggested by the 
-#autocorrelation or partial autocorrelation functions?
-
-acf(transformed_morg_ts)
-pacf(transformed_morg_ts)
-
-acf(mortgage_ts)
-
-#Is there any model suggested by the autocorrelation or partial autocorrelation functions?
-
-#Since both the acf and pacf have 1 statistically significant lags, I could see an 
-#Ar(1) or an MA(1) model fitting well.
-#or do we say ARIMA(1,1,0) or ARIMA(0,1,1)
-
-
-
-#(e) Build an ARIMA model for the monthly mortgage rate. Perform model checking and 
-#write down the fitted model. If there are competing models that fit the data, determine 
-#your model selection criterion.
-
-
-#ARIMA(1,1,0)
-sarima(mortgage_ts,p = 1,d = 1, q = 0)
-?sarima
-
-#ARIMA(0,1,1)
-sarima(mortgage_ts,p=0,d=1,q=1)
-
-#explain why ARIMA(0,1,1) is better
-
-
-#(f) Mortgage rate is known to depend on the Federal Funds rate. Build a time series 
-#model for the mortgage rate using the lag-1 federal funds rate as an explanatory variable. 
-#Perform model checking and write down the fitted model. (If LaTeX: \{F_t\}
- 
-
-laggedFFR = lag(mortgage$ffr)                                                                                                                                                                                                                                       
-morgLM = lm(mortgage$morg ~ lag(mortgage$ffr))
-summary(morgLM)
-
-#check the acf of the residuals
-acf2(resid(morgLM))
-
-sarima(resid(morgLM), 0, 0, 1) #check if MA(1) model for errors
 ```
+
