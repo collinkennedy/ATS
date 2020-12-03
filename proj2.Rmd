@@ -1,9 +1,10 @@
 ---
-title: "STA 137: Project 2"
+title: 'STA 137: Project 2'
 author: "Collin Kennedy"
 date: "11/25/2020"
 output:
   html_document: default
+  word_document: default
   pdf_document: default
 ---
 
