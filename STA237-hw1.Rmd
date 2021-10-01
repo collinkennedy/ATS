@@ -1,0 +1,25 @@
+---
+title: "STA237-hw1"
+author: "Collin"
+date: "10/1/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(astsa)
+
+accidents_data = readxl::read_xlsx("accidents.xlsx",col_names = FALSE) %>% 
+  mutate(accidents = `...1`) %>% 
+  select(accidents)
+?read_xlsx
+accidents_data
+```
+
+
+```{r}
+
+
+```
+

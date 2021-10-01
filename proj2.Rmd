@@ -20,6 +20,8 @@ mortgage = read.table("/Users/collinkennedy/Downloads/Downloads/mortgage.txt", h
 
 ## **Introduction**
 ```{r Introduction, include=FALSE}
+
+mortgage
 mortgage_ts <- ts(mortgage$morg, start=c(1971, 4), end=c(2011, 11), frequency=12)
 plot(mortgage_ts)
 ffr_ts = ts(mortgage$ffr, start=c(1971, 4), end=c(2011, 11), frequency=12)
