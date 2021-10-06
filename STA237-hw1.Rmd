@@ -1,25 +1,278 @@
 ---
 title: "STA237-hw1"
-author: "Collin"
+author: "Collin Kennedy and Qianhui Wan"
 date: "10/1/2021"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(astsa)
+library(lubridate)
+library(fastDummies)
+library(TSPred)
+library(car)
 
 accidents_data = readxl::read_xlsx("accidents.xlsx",col_names = FALSE) %>% 
   mutate(accidents = `...1`) %>% 
   select(accidents)
-?read_xlsx
-accidents_data
+
+```
+
+# Problem 2:
+## 1) Plot the data;
+```{r}
+accidents_ts = ts(data = accidents_data, start = c(1973,1), end = c(1978,12), frequency = 12)
+
+
+accidents_data = accidents_data %>% 
+  mutate(date = seq.Date(from = my("011973"),to = my("121978"),by = "month"))
+
+
+ggplot(data = accidents_data, mapping = aes(x = date,y=accidents))+
+  geom_line()+
+  ggtitle(label = "Accidents Time Series", subtitle = "1973-1978")+
+  theme_minimal()
 ```
 
 
+## 2) Find estimates st ,t= 1,...,12, for the classical decompositionXt=mt+st+Zt, where
+```{r}
+ts_components = decompose(accidents_ts)
+
+plot(ts_components)
+
+
+
+#we need to detrend before we can deseasonalize, correct? YES 
+#manually doing the decomposition:
+accidents_data = accidents_data %>% 
+  mutate(year = format(date, "%Y")) %>% 
+  mutate(month = month(date))
+
+
+
+accidents_transposed = accidents_data %>% 
+  select(accidents,year,month) %>% 
+  group_by(year) %>% 
+  summarise(mj_hat = mean(accidents))
+
+
+full_accidents_df = accidents_data %>% 
+  select(-date) %>% 
+  pivot_wider(names_from = month,values_from = accidents) %>% 
+  left_join(accidents_transposed) %>% 
+  mutate(jan_diff = `1` - mj_hat) %>% 
+  mutate(feb_diff = `2` - mj_hat) %>% 
+  mutate(march_diff = `3` - mj_hat) %>% 
+  mutate(april_diff = `4` - mj_hat) %>% 
+  mutate(may_diff = `5` - mj_hat) %>% 
+  mutate(june_diff = `6` - mj_hat) %>% 
+  mutate(july_diff = `7` - mj_hat) %>% 
+  mutate(aug_diff = `8` - mj_hat) %>% 
+  mutate(sept_diff = `9`- mj_hat) %>% 
+  mutate(oct_diff = `10` - mj_hat) %>% 
+  mutate(nov_diff = `11` - mj_hat) %>% 
+  mutate(dec_diff = `12` - mj_hat) %>% 
+  summarise(jan_comp = mean(jan_diff),feb_comp = mean(feb_diff),
+            march_comp = mean(march_diff), april_comp = mean(april_diff),
+            may_comp = mean(may_diff), june_comp = mean(june_diff),
+            july_comp = mean(july_diff), aug_comp = mean(aug_diff),
+            sept_comp = mean(sept_diff), oct_comp = mean(oct_diff),
+            nov_comp = mean(nov_diff), dec_comp = mean(dec_diff))
+
+#confirmed manually
+  
+
+
+
+ts_components$seasonal
+
+```
+
+## 3) Plot the deseasonalized data
+```{r}
+deseasonalized_ts = accidents_ts - ts_components$seasonal
+
+plot(deseasonalized_ts, main = "Deseasonalized Accidents Time Series")
+```
+
+## 4) Fit a suitable polynomial by least squares to the deseasonalized data and use it as your estimate ˆmt of mt;
+```{r include=FALSE}
+
+deseasonalized_ts_df = as_tibble(deseasonalized_ts) %>% 
+  mutate(t = seq(from = 1, to = 72, by = 1))
+
+#test up to 25 degree polynomial models:
+model_aics = c()
+for(i in 1:25){
+  poly_model = lm(accidents_ts ~ poly(t,i),data = deseasonalized_ts_df)
+  poly_model_aic = AIC(poly_model)
+  model_aics = c(model_aics,poly_model_aic)
+  
+}
+which.min(model_aics) #model 23
+
+
+```
+
+```{r}
+#get the fitted values from the polynomial model then plot that:
+#fit a polynomial of order n = 3
+
+poly_model = lm(accidents_ts ~ poly(t,3),data = deseasonalized_ts_df)
+deseasonalized_ts_df = deseasonalized_ts_df %>% 
+  mutate(poly_fitted_values = poly_model$fitted.values)
+ggplot(data = deseasonalized_ts_df, mapping =aes(x = t, y = accidents_ts))+
+  geom_line()+
+  geom_line(color = 'red', data = deseasonalized_ts_df, mapping = aes(x = t, y = poly_fitted_values ))
+```
+
+Here I plot a polynomial of order 3. It appears to fit the overall trend of the data without overfitting.
+
+## 5) Plot the residuals
+```{r}
+#note that accidents_ts is already adjusted for the seasonal component
+deseasonalized_ts_df = deseasonalized_ts_df %>% 
+  mutate(resid = poly_fitted_values - accidents_ts) %>% 
+  mutate(std_residuals = resid/sd(resid))
+
+ggplot(data = deseasonalized_ts_df, mapping = aes(x = t, y = resid))+
+  geom_point()+
+  ggtitle(label = "Residuals vs Time")+
+  theme_minimal()
+
+
+```
+
+The residuals appear to be somewhat randomly distributed about 0, indicating constant variance.
+
+## 6)  Compute the sample ACF of the residuals
+```{r}
+acf(deseasonalized_ts_df$resid,plot = F)
+
+```
+
+
+## 7) Use your fitted model to predict Xt
+```{r}
+
+#Right now I've essentially regressed  seasonally adjusted accidents on an nth order polynomial. is that correct??
+
+
+new_data = seq(from = 73, to = 84, by = 1) 
+new_data = tibble(t = new_data)
+model_predictions = predict(poly_model,newdata = new_data)
+
+
+```
+ Our third order polynomial model predicts the following number of accidents for t = 73,..., 84: `r model_predictions`
+
+# Problem 3: Testing the Residuals
+## Method 1: Sample ACF
+```{r}
+acf(deseasonalized_ts_df$resid)
+
+```
+
+The ACF plot above is a good tool to use to get an initial idea of the autocorrelation (or lack thereof) that exists in the time series. For the most part this sample ACF plot seems pretty good, in the sense that most of the lags have statistically *in*significant autocorrelation. However, there are a couple lags (between 5 and 10) that appear to be significant. This is good justification for further exploration of the autocorrelation in the data.
+
+## Method 2: Portmanteau Test
+$H_{0}$: independent and identically distributed residuals
+
+$H_{a}$: the residuals are not independent and identically distributed
+```{r}
+Box.test(deseasonalized_ts_df$resid, type = "Ljung-Box", fitdf = 0)
+
+acf_values = acf(deseasonalized_ts_df$resid,plot = F)$acf
+
+acf(deseasonalized_ts_df$resid,plot = F)
+
+
+sum_rho_squared = 0
+for(i in 2:18){
+  rho_i_squared = (acf_values[i])^2
+  sum_rho_squared = sum_rho_squared + rho_i_squared
+  
+}
+Q_statistic = 72*sum_rho_squared
+
+
+Q_statistic > qchisq(.95,18)
+
+p_value = pchisq(Q_statistic,18,lower.tail = FALSE)
+
+```
+
+We calculate a p-value of ~ `r p_value`, which is < .05, so we reject the null hypothesis. We are a little concerned with this result given what we find with Methods 3 and 4 (where we fail to reject the null of iid residuals). The results seem contradictory but we are unsure as to why.
+
+## Method 3: The Rank Test
+$H_{0}$: residuals are independent and identically distributed
+
+$H_{a}$: residuals are *not* independent and identically distributed
 ```{r}
 
 
+rank_test_df = deseasonalized_ts_df %>% 
+  select(std_residuals) %>% 
+  mutate(i = seq(1,72,by = 1)) %>% 
+  mutate(j = seq(1,72,by = 1))
+
+rank_test_df
+
+random_pairs_df = tibble(std_residual_i = numeric(),std_residual_j = numeric(),i = numeric(),j = numeric())
+
+
+for(i in 2:length(rank_test_df$std_residuals)){#start from the second row
+  
+  for(j in 1:length(rank_test_df$std_residuals)){
+    
+    if(rank_test_df[i,]$i > rank_test_df[j,]$j){
+      #add that pair to the random_pairs_df
+      random_pairs_df = random_pairs_df %>% add_row(std_residual_i = rank_test_df$std_residuals[[i]],
+                                  std_residual_j = rank_test_df$std_residuals[[j]],
+                                  i = rank_test_df$i[[i]],
+                                  j = rank_test_df$j[[j]]
+                                  )
+    }else{
+      break
+    }
+
+  }
+}
+
+#calculate Pi
+random_pairs_df %>% 
+  mutate(res_i_greater_res_j = ifelse(std_residual_i > std_residual_j,1,0)) %>% 
+  summarise(pi = sum(res_i_greater_res_j)) #pi = 1307
+
+mu_pi = (1/4)*length(rank_test_df$std_residuals)*(length(rank_test_df$std_residuals)-1)
+sigma_pi = (1/72)*length(rank_test_df$std_residuals)*(length(rank_test_df$std_residuals)-1)*(2*length(rank_test_df$std_residuals)+5)
+sigma_pi
+
+mu_pi
+
+P_statistic = (1307 - mu_pi)/sigma_pi
+P_statistic
+
+P_statistic > 1.96
+
 ```
 
+Since our test statistic P = `r P_statistic` *is not* $>$ 1.96, the corresponding normal distribution critical value at $\alpha$ = .05, we fail to reject the null hypothesis and conclude that the residuals are independent and identically distributed.
+
+## Method 4: QQPlot (Test for Normality)
+```{r}
+#standardize the residuals first
+deseasonalized_ts_df = deseasonalized_ts_df %>% 
+  mutate(std_residuals = resid/sd(resid))
+
+deseasonalized_ts_df
+qqPlot(deseasonalized_ts_df$std_residuals)
+
+```
+Since the vast majority of the residuals fall along the line of the qq plot, this tells us that it is appropriate to assume the residuals are approximately normally distributed.
+#explain qqplot
