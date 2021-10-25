@@ -54,6 +54,7 @@ accidents_data = accidents_data %>%
   mutate(month = month(date))
 
 
+#to deseasonalize, must calculate the annual components. the seasonal components are just an average of the deviations from a given months respective mean. ie, if you want the january seasonal component, you'd find the average for each year, then for each january calculate the difference between the january values and the average for that respective year. the seasonal component is then an average of that.
 
 accidents_transposed = accidents_data %>% 
   select(accidents,year,month) %>% 
@@ -275,4 +276,15 @@ qqPlot(deseasonalized_ts_df$std_residuals)
 
 ```
 Since the vast majority of the residuals fall along the line of the qq plot, this tells us that it is appropriate to assume the residuals are approximately normally distributed.
-#explain qqplot
+
+
+
+```{r}
+
+ARMAtoMA(ar = c(.2,-.48),lag.max = 5)
+
+3 %>% choose(2)
+```
+
+
+

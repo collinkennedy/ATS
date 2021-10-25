@@ -1,0 +1,139 @@
+---
+title: "Time Series Modeling"
+author: 'Collin & Qianhui '
+date: "10/15/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(aTSA)
+library(forecast)
+
+
+```
+
+
+# Problem 9:
+```{r}
+spots_data = read_csv("spots.dat",col_names = F) %>% 
+  rename("spots" = "X1")
+spots_data
+
+#make a time series
+spots_ts = ts(data = spots_data,start = 1770, end = 1869, frequency = 1)
+
+
+
+
+#transform data to make it stationary
+spots_data = spots_data %>% 
+  mutate(log_diff_spots = log(spots)-log(lag(spots))) %>% 
+  mutate(grow_rate_spots = (spots - lag(spots))/lag(spots)) %>% 
+  mutate(log_spots = log(spots)) %>% 
+  mutate(diff_spots = spots - lag(spots)) %>% 
+  filter(spots != 0, spots != 1) %>% 
+  drop_na()
+
+spots_data
+
+transformed_spots_ts = ts(data = spots_data, start = 1770, end = 1869, frequency = 1)
+
+
+
+```
+
+## part 1: preliminary inspection of the data:
+
+```{r echo=TRUE}
+# acf(spots_data$spots)
+# adf.test(spots_data$spots) #potentially unit root, try differencing transformation
+# 
+# 
+# 
+# acf(spots_data$diff_spots) #doesnt look stationary?
+# adf.test(spots_data$diff_spots) #not unit root, conclude stationarity assumption is met
+# pacf(spots_data$diff_spots)
+# 
+# spots_data$grow_rate_spots
+spots_data$grow_rate_spots
+acf(spots_data$grow_rate_spots) #this might be the one
+adf.test(spots_data$grow_rate_spots) #yessss not unit root, conclude stationary
+
+
+pacf(spots_data$grow_rate_spots) #Ar1
+
+
+```
+
+After trying several transformations of the sunspots data, I find that a growth rate transformation appears to result in the stationarity assumption being met, based on the ACF plot. Conducting the Augmented-Dickey Fuller Test confirms this, as a p-value < .01 leads us to reject the null hypothesis of unit root and conclude that the time series is indeed stationary.
+
+Looking at the PACF, it appears that there is 1 highly statistically significant lag. As a result, I would suggest an AR(1) model to be sufficient for modelling sunspots.
+
+
+## part 2. 
+```{r}
+
+ar_model = ar.ols(spots_data$grow_rate_spots,order.max = 1)
+
+ar_model 
+
+
+```
+
+
+## part 3.
+
+```{r}
+fcst = forecast(ar_model,h = 10, level = .95)
+fcst
+
+plot(fcst)
+```
+
+# Problem 10:
+## part 1:
+```{r}
+soi_data = read_csv("soi.dat",col_names = FALSE) %>% 
+  rename("soi" = "X1") %>% 
+  mutate(log_diff_soi = log(soi) - log(lag(soi))) %>% 
+  mutate(growth_rate_soi = (soi - lag(soi))/lag(soi))
+
+#assuming this is monthly data based on what I found online
+soi_ts = ts(soi_data,start = 1, end = 453,frequency = 12 )
+
+acf(na.omit(soi_data$log_diff_soi))
+
+pacf(na.omit(soi_data$log_diff_soi))
+
+
+
+
+```
+
+After noticing considerable autocorrelation in the acf plot of the unmodified data, I applied a log-difference transformation and then re-checked the ACF plot. The autocorrelation appears to have been alleviated, and the PACF has one statistically significant lag, suggesting that again an AR(1) model may be sufficient to model the southern oscillation index.
+
+
+## part 2.
+```{r}
+#creating AR(1) model
+soi_ar_model = ar.ols(x = na.omit(soi_data$log_diff_soi,order.max = 1))
+soi_ar_model
+
+```
+
+
+## part 3.
+```{r}
+soi_forecast = forecast(soi_ar_model,h = 10, level = .95)
+#1 - 10 step ahead forecasts along with lower and upper bounds for the predictions intervals:
+soi_forecast
+
+```
+
+
+
+
